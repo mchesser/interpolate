@@ -1,0 +1,4 @@
+[package]
+name = "interpolate"
+version = "0.1.0"
+authors = ["quvarxa <michaelchesser@outlook.com>"]
