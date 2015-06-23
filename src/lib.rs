@@ -1,12 +1,12 @@
 pub trait Interpolate: Clone {
     #[inline]
-	fn bilerp(v: [[Self; 2]; 2], x: f64, y: f64) -> Self {
+    fn bilerp(v: [[Self; 2]; 2], x: f64, y: f64) -> Self {
         let v0 = Interpolate::lerp([v[0][0].clone(), v[0][1].clone()], y);
         let v1 = Interpolate::lerp([v[1][0].clone(), v[1][1].clone()], y);
         Interpolate::lerp([v0, v1], x)
     }
-	
-	#[inline]
+
+    #[inline]
     fn lerp(v: [Self; 2], x: f64) -> Self;
 }
 
@@ -53,36 +53,36 @@ impl Interpolate for u8 {
 #[cfg(test)]
 mod test {
     use super::*;
-    
+
     #[derive(Clone, Copy, Debug, Eq, PartialEq)]
     struct Rgb {
-    	r: u8,
-    	g: u8,
-    	b: u8,
+        r: u8,
+        g: u8,
+        b: u8,
     }
-    
+
     impl Interpolate for Rgb {
-    	fn lerp(v: [Rgb; 2], x: f64) -> Rgb {
-    		Rgb {
+        fn lerp(v: [Rgb; 2], x: f64) -> Rgb {
+            Rgb {
                 r: u8::lerp([v[0].r, v[1].r], x),
                 g: u8::lerp([v[0].g, v[1].g], x),
                 b: u8::lerp([v[0].b, v[1].b], x)
-    		}
-    	}
+            }
+        }
     }
 
     // Test that we get the right result for a basic type
-	#[test]
-	fn basic_lerp_test() {
+    #[test]
+    fn basic_lerp_test() {
         let result = f32::lerp([0.0, 100.0], 0.5);
         assert!(49.9 < result && result < 50.1);
     }
-    
+
     // Test that an implementation for a custom type works
     #[test]
     fn custom_type_lerp_test() {
-		let start = Rgb { r: 0, g: 255, b: 0 };
-	    let end = Rgb { r: 100, g: 0, b: 200 };
+        let start = Rgb { r: 0, g: 255, b: 0 };
+        let end = Rgb { r: 100, g: 0, b: 200 };
         assert_eq!(Rgb::lerp([start, end], 0.5), Rgb { r: 50, g: 127, b: 100 });
-	}
+    }
 }
