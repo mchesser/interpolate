@@ -33,22 +33,32 @@ impl Interpolate for f32 {
     }
 }
 
-impl Interpolate for u8 {
-    fn lerp(v: [u8; 2], x: f64) -> u8 {
-        Interpolate::lerp([v[0] as f64, v[1] as f64], x) as u8
-    }
-
-    fn bilerp(v: [[u8; 2]; 2], x: f64, y: f64) -> u8 {
-        let array = [
-            [v[0][0] as f64, v[0][1] as f64],
-            [v[1][0] as f64, v[1][1] as f64],
-        ];
-        Interpolate::bilerp(array, x, y) as u8
-    }
+macro_rules! impl_interpolate {
+    ($src_type:ty, $dest_type:ty) => (
+        impl Interpolate for $src_type {
+            fn lerp(v: [$src_type; 2], x: f64) -> $src_type {
+                Interpolate::lerp([v[0] as $dest_type, v[1] as $dest_type], x) as $src_type
+            }
+        }
+    )
 }
 
-// TODO: Implement interpolate trait for all types that it is useful for. We might have to do some
-// macro magic to do this without too much code duplication.
+impl_interpolate!(u8, f32);
+impl_interpolate!(u16, f32);
+impl_interpolate!(u32, f64);
+impl_interpolate!(u64, f64);
+
+impl_interpolate!(i8, f32);
+impl_interpolate!(i16, f32);
+impl_interpolate!(i32, f64);
+impl_interpolate!(i64, f64);
+
+/// Performs linear interpolation between the elements of two arrays.
+pub fn interpolate_array<T: Interpolate>(input: [&[T]; 2], output: &mut [T], x: f64) {
+    for (output, (a, b)) in output.iter_mut().zip(input[0].iter().zip(input[1].iter())) {
+        *output = Interpolate::lerp([a.clone(), b.clone()], x);
+    }
+}
 
 #[cfg(test)]
 mod test {
@@ -84,5 +94,17 @@ mod test {
         let start = Rgb { r: 0, g: 255, b: 0 };
         let end = Rgb { r: 100, g: 0, b: 200 };
         assert_eq!(Rgb::lerp([start, end], 0.5), Rgb { r: 50, g: 127, b: 100 });
+    }
+
+    // Test that interpolating arrays works correctly
+    #[test]
+    fn interpolate_array_test() {
+        let start = [0, 255, 0];
+        let end = [100, 0, 200];
+
+        let mut output = [0; 3];
+        interpolate_array([&start, &end], &mut output, 0.5);
+
+        assert_eq!(output, [50, 127, 100]);
     }
 }
