@@ -6,13 +6,15 @@ pub trait Interpolate: Clone {
         Interpolate::lerp([v0, v1], x)
     }
 
-    #[inline]
     fn lerp(v: [Self; 2], x: f64) -> Self;
 }
 
 impl Interpolate for f64 {
     fn bilerp(v: [[f64; 2]; 2], x: f64, y: f64) -> f64 {
-        v[0][0]*(1.0-x)*(1.0-y) + v[1][0]*x*(1.0-y) + v[0][1]*(1.0-x)*y + v[1][1]*x*y
+        v[0][0] * (1.0 - x) * (1.0 - y)
+            + v[1][0] * x * (1.0 - y)
+            + v[0][1] * (1.0 - x) * y
+            + v[1][1] * x * y
     }
 
     fn lerp(v: [f64; 2], x: f64) -> f64 {
@@ -24,7 +26,10 @@ impl Interpolate for f32 {
     fn bilerp(v: [[f32; 2]; 2], x: f64, y: f64) -> f32 {
         let x = x as f32;
         let y = y as f32;
-        (v[0][0]*(1.0-x)*(1.0-y) + v[1][0]*x*(1.0-y) + v[0][1]*(1.0-x)*y + v[1][1]*x*y)
+        v[0][0] * (1.0 - x) * (1.0 - y)
+            + v[1][0] * x * (1.0 - y)
+            + v[0][1] * (1.0 - x) * y
+            + v[1][1] * x * y
     }
 
     fn lerp(v: [f32; 2], x: f64) -> f32 {
@@ -34,13 +39,13 @@ impl Interpolate for f32 {
 }
 
 macro_rules! impl_interpolate {
-    ($src_type:ty, $dest_type:ty) => (
+    ($src_type:ty, $dest_type:ty) => {
         impl Interpolate for $src_type {
             fn lerp(v: [$src_type; 2], x: f64) -> $src_type {
                 Interpolate::lerp([v[0] as $dest_type, v[1] as $dest_type], x) as $src_type
             }
         }
-    )
+    };
 }
 
 impl_interpolate!(u8, f32);
@@ -76,7 +81,7 @@ mod test {
             Rgb {
                 r: u8::lerp([v[0].r, v[1].r], x),
                 g: u8::lerp([v[0].g, v[1].g], x),
-                b: u8::lerp([v[0].b, v[1].b], x)
+                b: u8::lerp([v[0].b, v[1].b], x),
             }
         }
     }
